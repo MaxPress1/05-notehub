@@ -3,9 +3,16 @@ import * as Yup from "yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNote } from "../../services/noteService";
 import css from "./NoteForm.module.css";
+import { toast } from "react-toastify";
 
 interface NoteFormProps {
   onClose: () => void;
+}
+
+interface NoteFormValues {
+  title: string;
+  content: string;
+  tag: "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
 }
 
 const validationSchema = Yup.object().shape({
@@ -19,7 +26,7 @@ const validationSchema = Yup.object().shape({
     .required("Tag is required"),
 });
 
-const initialValues = {
+const initialValues: NoteFormValues = {
   title: "",
   content: "",
   tag: "Todo",
@@ -33,6 +40,9 @@ export default function NoteForm({ onClose }: NoteFormProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       onClose();
+    },
+    onError: () => {
+      toast.error("Failed to create note. Please try again.");
     },
   });
 
@@ -76,9 +86,11 @@ export default function NoteForm({ onClose }: NoteFormProps) {
         </label>
 
         <div className={css.actions}>
-          <button type="submit" className={css.button}>
-            Create note
-          </button>
+          {
+            <button type="submit" className={css.button}>
+              Create note
+            </button>
+          }
           <button type="button" onClick={onClose} className={css.cancel}>
             Cancel
           </button>
